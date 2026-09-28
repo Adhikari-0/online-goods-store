@@ -76,4 +76,5 @@ public class MembershipServiceImpl implements MembershipService {
             .orElseThrow(() -> new ResourceNotFoundException(
                 "Membership not found for user=" + userId + ", org=" + organizationId));
     }
+    
 }

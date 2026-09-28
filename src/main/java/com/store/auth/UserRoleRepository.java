@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
 
-	// --- Basic lookups ---
+	// Basic lookups
 
 	List<UserRole> findAllByUserId(Long userId);
 
@@ -25,7 +25,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
 
 	boolean existsByUserIdAndRoleIdAndOrganizationId(Long userId, Long roleId, Long organizationId);
 
-	// --- Fetch with role + permissions (avoids N+1) ---
+	// Fetch with role + permissions (avoids N+1)
 
 	@Query("""
 			    SELECT DISTINCT ur FROM UserRole ur
@@ -35,7 +35,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
 			""")
 	List<UserRole> findAllByUserIdWithRoleAndPermissions(@Param("userId") Long userId);
 
-	// --- Delete ---
+	// Delete
 
 	@Modifying
 	@Query("""
@@ -53,7 +53,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
 	@Modifying
 	void deleteAllByRoleId(Long roleId);
 
-	// --- Role checks (fast path) ---
+	// Role checks (fast path)
 
 	@Query("""
 			    SELECT COUNT(ur) > 0 FROM UserRole ur
@@ -79,7 +79,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
 	@Query("SELECT COUNT(ur) FROM UserRole ur WHERE ur.role.id = :roleId")
 	long countByRoleId(@Param("roleId") Long roleId);
 
-	// --- Users with a specific role in an org ---
+	// --- Users with a specific role in an org
 
 	@Query("""
 			    SELECT DISTINCT ur.user FROM UserRole ur
