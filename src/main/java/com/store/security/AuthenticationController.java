@@ -1,11 +1,8 @@
-package com.store.auth;
+package com.store.security;
 
-import com.store.security.CustomUserDetails;
-import com.store.security.JwtService;
 import com.store.security.dto.LoginRequest;
 import com.store.security.dto.LoginResponse;
 import com.store.security.dto.RegisterRequest;
-import com.store.security.CustomUserDetailsService;
 import com.store.user.UserService;
 import com.store.user.dto.CreateUserRequest;
 import com.store.user.dto.UserResponse;

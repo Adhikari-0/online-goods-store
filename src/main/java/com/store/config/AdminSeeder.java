@@ -1,4 +1,4 @@
-package com.store.security;
+package com.store.config;
 
 import com.store.auth.*;
 import com.store.user.*;
