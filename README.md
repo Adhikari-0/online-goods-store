@@ -7,4 +7,10 @@
 | Method | POST |
 | name | {{baseUrl}}/api/auth/login |
 | Headers	Content-Type: | application/json |
+
+Body (raw JSON):
+{
+  "email": "admin@store.com",
+  "password": "Admin123!"
+}
    
