@@ -1,4 +1,5 @@
 # online-goods-store
+-- baseUrl : http://localhost:1001 --
 -- The following test is executed using postman --
 1. AUTHENTICATION (Super Admin)
    
