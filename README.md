@@ -8,9 +8,9 @@
 | name | {{baseUrl}}/api/auth/login |
 | Headers	Content-Type: | application/json |
 
-Body (raw JSON):
-{
-  "email": "admin@store.com",
-  "password": "Admin123!"
+Body (raw JSON):<br>
+{<br>
+  "email": "admin@store.com",<br>
+  "password": "Admin123!"<br>
 }
    
