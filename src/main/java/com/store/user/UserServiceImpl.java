@@ -1,5 +1,9 @@
 package com.store.user;
 
+import com.store.auth.Role;
+import com.store.auth.RoleRepository;
+import com.store.auth.UserRole;
+import com.store.auth.UserRoleRepository;
 import com.store.common.dto.PageResponse;
 import com.store.common.exception.DuplicateResourceException;
 import com.store.common.exception.ResourceNotFoundException;
@@ -21,16 +25,20 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final UserProfileRepository profileRepository;
+	private final RoleRepository roleRepository;
+	private final UserRoleRepository userRoleRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	public UserServiceImpl(UserRepository userRepository, UserProfileRepository profileRepository,
-			PasswordEncoder passwordEncoder
-	) {
+			RoleRepository roleRepository, UserRoleRepository userRoleRepository, PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.profileRepository = profileRepository;
+		this.roleRepository = roleRepository;
+		this.userRoleRepository = userRoleRepository;
 		this.passwordEncoder = passwordEncoder;
 	}
 
+	// Creating User by Super-Admin
 	@Override
 	public UserResponse create(CreateUserRequest request) {
 		if (userRepository.existsByEmail(request.email())) {
@@ -39,7 +47,7 @@ public class UserServiceImpl implements UserService {
 
 		User user = new User();
 		user.setEmail(request.email().toLowerCase().trim());
-	    user.setPasswordHash(passwordEncoder.encode(request.password()));
+		user.setPasswordHash(passwordEncoder.encode(request.password()));
 		user.setFullName(request.fullName());
 		user.setPhone(request.phone());
 		user.setStatus(UserStatusEnum.PENDING_VERIFICATION);
@@ -51,7 +59,28 @@ public class UserServiceImpl implements UserService {
 		profile.setUser(saved);
 		profileRepository.save(profile);
 
+		// Auto-assign USER role
+		assignDefaultUserRole(saved);
+
 		return toResponse(saved);
+	}
+
+	/**
+	 * Assigns the base USER role to a newly created user. If the USER role doesn't
+	 * exist yet, silently skips.
+	 */
+	private void assignDefaultUserRole(User user) {
+		roleRepository.findByName("USER").ifPresent(role -> {
+			UserRole userRole = new UserRole();
+			userRole.setUser(user);
+			userRole.setRole(role);
+			userRole.setGrantedBy("system");
+			userRole.setGrantedAt(Instant.now());
+			userRoleRepository.save(userRole);
+
+			// Keep in-memory object in sync so toResponse() sees the role
+			user.getUserRoles().add(userRole);
+		});
 	}
 
 	@Override
