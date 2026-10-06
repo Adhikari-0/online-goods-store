@@ -4,16 +4,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
 
-	// Basic lookups
+	// --- Basic lookups ---
 
 	List<UserRole> findAllByUserId(Long userId);
 
@@ -25,7 +23,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
 
 	boolean existsByUserIdAndRoleIdAndOrganizationId(Long userId, Long roleId, Long organizationId);
 
-	// Fetch with role + permissions (avoids N+1)
+	// --- Fetch with role + permissions ---
 
 	@Query("""
 			    SELECT DISTINCT ur FROM UserRole ur
@@ -35,14 +33,17 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
 			""")
 	List<UserRole> findAllByUserIdWithRoleAndPermissions(@Param("userId") Long userId);
 
-	// Delete
+	// --- Delete (FIXED for NULL organization_id) ---
 
-	@Modifying
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
 	@Query("""
 			    DELETE FROM UserRole ur
 			    WHERE ur.user.id = :userId
 			      AND ur.role.id = :roleId
-			      AND ur.organization.id = :orgId
+			      AND (
+			            (:orgId IS NULL AND ur.organization IS NULL)
+			            OR ur.organization.id = :orgId
+			          )
 			""")
 	int deleteByUserIdAndRoleIdAndOrganizationId(@Param("userId") Long userId, @Param("roleId") Long roleId,
 			@Param("orgId") Long orgId);
@@ -53,7 +54,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
 	@Modifying
 	void deleteAllByRoleId(Long roleId);
 
-	// Role checks (fast path)
+	// --- Role checks ---
 
 	@Query("""
 			    SELECT COUNT(ur) > 0 FROM UserRole ur
@@ -79,7 +80,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
 	@Query("SELECT COUNT(ur) FROM UserRole ur WHERE ur.role.id = :roleId")
 	long countByRoleId(@Param("roleId") Long roleId);
 
-	// --- Users with a specific role in an org
+	// --- Users with a specific role in an org ---
 
 	@Query("""
 			    SELECT DISTINCT ur.user FROM UserRole ur
